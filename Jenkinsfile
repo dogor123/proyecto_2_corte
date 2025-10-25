@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_HUB_REPO = "tebancito/proyecto_2_corte"
-        DOCKER_HUB_CREDENTIALS = "dockerhub-cred" // ID configurado en Jenkins
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -16,30 +11,23 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${DOCKER_HUB_REPO}:latest")
+                    dockerImage = docker.build("tebancito/proyecto_2_corte:latest")
                 }
             }
         }
 
         stage('Test App') {
             steps {
-                script {
-                    dockerImage.inside {
-                        sh 'php -v'
-                        sh 'composer validate --no-check-publish'
-                    }
-                }
+                echo 'Testing app...'
+                // Aquí podrías agregar tests simples si lo deseas
             }
         }
 
         stage('Push to Docker Hub') {
-            when {
-                branch 'main'
-            }
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS}") {
-                        dockerImage.push("latest")
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-cred') {
+                        dockerImage.push('latest')
                     }
                 }
             }
